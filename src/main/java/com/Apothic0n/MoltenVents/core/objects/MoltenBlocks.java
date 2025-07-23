@@ -53,7 +53,7 @@ public final class MoltenBlocks {
                     new DormantMoltenBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TUFF).sound(SoundType.TUFF).pushReaction(PushReaction.BLOCK))),
 
             BLOCKS.register("active_molten_" + blockName, () ->
-                    new ActiveMoltenBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TUFF).explosionResistance(1200).sound(SoundType.TUFF).lightLevel((brightness) -> {return 15;})))
+                    new ActiveMoltenBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TUFF).explosionResistance(1200).sound(SoundType.TUFF).pushReaction(PushReaction.BLOCK).lightLevel((brightness) -> {return 15;})))
         );
     }
 
