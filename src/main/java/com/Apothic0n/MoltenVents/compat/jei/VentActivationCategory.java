@@ -9,6 +9,7 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -39,7 +40,6 @@ public class VentActivationCategory implements IRecipeCategory<VentActivationRec
 
     private final IDrawable background;
     private final IDrawable icon;
-    private final IDrawable arrow;
 
     public VentActivationCategory(IGuiHelper guiHelper) {
         // Blank background sized to fit two slots + arrow
@@ -50,12 +50,6 @@ public class VentActivationCategory implements IRecipeCategory<VentActivationRec
                 .getOptional(ResourceLocation.tryParse("create:blaze_burner"))
                 .orElse(Items.BLAZE_POWDER);
         this.icon = guiHelper.createDrawableItemStack(new net.minecraft.world.item.ItemStack(blazeBurnerItem));
-
-        // Use vanilla crafting arrow (from crafting table texture)
-        this.arrow = guiHelper.drawableBuilder(
-                ResourceLocation.withDefaultNamespace("textures/gui/container/crafting_table.png"),
-                82, 30, 22, 16)
-                .build();
     }
 
     // ------------------------------------------------------------------ IRecipeCategory
@@ -97,22 +91,17 @@ public class VentActivationCategory implements IRecipeCategory<VentActivationRec
     @Override
     public void draw(VentActivationRecipe recipe, IRecipeSlotsView recipeSlotsView,
                      GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        // Draw arrow
-        arrow.draw(guiGraphics, ARROW_X, ARROW_Y);
+        var font = Minecraft.getInstance().font;
 
-        // Draw activation time label
+        // Draw arrow between the two slots
+        guiGraphics.drawString(font, "→", ARROW_X + 3, ARROW_Y + 4, 0xFF_FF_FF_FF, false);
+
+        // Draw activation time label above arrow
         String timeLabel = recipe.getActivationSeconds() + "s";
-        guiGraphics.drawString(
-                net.minecraft.client.Minecraft.getInstance().font,
-                timeLabel,
-                ARROW_X + 2, ARROW_Y - 9,
-                0xFF_FF_AA_00, // orange
-                false
-        );
+        guiGraphics.drawString(font, timeLabel, ARROW_X + 2, ARROW_Y - 9, 0xFF_FF_AA_00, false);
 
-        // Draw "Superheat" label
-        guiGraphics.drawString(
-                net.minecraft.client.Minecraft.getInstance().font,
+        // Draw "Superheat" label at top
+        guiGraphics.drawString(font,
                 Component.translatable("jei.molten_vents.superheat").getString(),
                 DORMANT_X, 0,
                 0xFF_CC_CC_CC,
