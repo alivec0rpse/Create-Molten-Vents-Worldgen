@@ -47,8 +47,8 @@ authors="${mod_authors}" #optional
 description='''${mod_description}'''
 
 # The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.
-#[[mixins]]
-#config="${mod_id}.mixins.json"
+[[mixins]]
+config="molten_vents.mixins.json"
 
 # The [[accessTransformers]] block allows you to declare where your AT file is.
 # If this block is omitted, a fallback attempt will be made to load an AT from META-INF/accesstransformer.cfg
@@ -87,9 +87,17 @@ side="BOTH"
 
 [[dependencies.${mod_id}]]
 modId="create"
-mandatory=true
-versionRange="[v0.5.1c,)"
+type="required"
+versionRange="[0.5.1c,)"
 ordering="BEFORE"
+side="BOTH"
+
+# JEI is optional — the mod works fine without it; if present, vent activation recipes are shown
+[[dependencies.${mod_id}]]
+modId="jei"
+type="optional"
+versionRange="[19.0.0,)"
+ordering="NONE"
 side="BOTH"
 
 
