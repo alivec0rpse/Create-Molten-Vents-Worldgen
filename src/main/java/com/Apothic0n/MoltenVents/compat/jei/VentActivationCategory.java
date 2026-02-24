@@ -24,19 +24,24 @@ public class VentActivationCategory implements IRecipeCategory<VentActivationRec
             "molten_vents", "vent_activation", VentActivationRecipe.class);
 
     /** Width of the category background */
-    private static final int WIDTH  = 116;
+    private static final int WIDTH  = 120;
     /** Height of the category background */
-    private static final int HEIGHT = 36;
+    private static final int HEIGHT = 62;
 
-    // Slot positions (top-left of each 16×16 slot icon)
-    private static final int DORMANT_X  = 1;
-    private static final int DORMANT_Y  = 10;
-    private static final int ACTIVE_X   = 81;
-    private static final int ACTIVE_Y   = 10;
+    // "Superheat" label row
+    private static final int LABEL_Y    = 2;
 
-    // Arrow area
-    private static final int ARROW_X    = 36;
-    private static final int ARROW_Y    = 10;
+    // Slot row — vertically centered in the remaining space below the label
+    private static final int SLOT_Y     = 18;
+    private static final int DORMANT_X  = 6;
+    private static final int ACTIVE_X   = 84;
+
+    // Arrow: horizontally centered in the gap between the two slots (24 to 84, centre = 54)
+    private static final int ARROW_X    = 46;
+    private static final int ARROW_Y    = 22;
+
+    // Time label centred below the arrow
+    private static final int TIME_Y     = 40;
 
     private final IDrawable background;
     private final IDrawable icon;
@@ -77,13 +82,13 @@ public class VentActivationCategory implements IRecipeCategory<VentActivationRec
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, VentActivationRecipe recipe, IFocusGroup focuses) {
-        // Input: dormant vent
-        builder.addSlot(RecipeIngredientRole.INPUT, DORMANT_X + 1, DORMANT_Y + 1)
+        // Input: dormant vent — slot box top-left at (DORMANT_X, SLOT_Y)
+        builder.addSlot(RecipeIngredientRole.INPUT, DORMANT_X, SLOT_Y)
                .addIngredients(VanillaTypes.ITEM_STACK,
                        java.util.List.of(recipe.getDormantStack()));
 
         // Output: active vent
-        builder.addSlot(RecipeIngredientRole.OUTPUT, ACTIVE_X + 1, ACTIVE_Y + 1)
+        builder.addSlot(RecipeIngredientRole.OUTPUT, ACTIVE_X, SLOT_Y)
                .addIngredients(VanillaTypes.ITEM_STACK,
                        java.util.List.of(recipe.getActiveStack()));
     }
@@ -93,19 +98,24 @@ public class VentActivationCategory implements IRecipeCategory<VentActivationRec
                      GuiGraphics guiGraphics, double mouseX, double mouseY) {
         var font = Minecraft.getInstance().font;
 
-        // Draw arrow between the two slots
-        guiGraphics.drawString(font, "→", ARROW_X + 3, ARROW_Y + 4, 0xFF_FF_FF_FF, false);
+        // ── "Superheat" header, centered ──────────────────────────────────────
+        String superheatStr = Component.translatable("jei.molten_vents.superheat").getString();
+        int superheatW = font.width(superheatStr);
+        guiGraphics.drawString(font, superheatStr,
+                (WIDTH - superheatW) / 2, LABEL_Y,
+                0xFF_FF_CC_66,   // warm gold
+                false);
 
-        // Draw activation time label above arrow
+        // ── Arrow ─────────────────────────────────────────────────────────────
+        guiGraphics.drawString(font, "\u2192", ARROW_X, ARROW_Y, 0xFF_FF_FF_FF, false);
+
+        // ── Time label, centred under the arrow ───────────────────────────────
         String timeLabel = recipe.getActivationSeconds() + "s";
-        guiGraphics.drawString(font, timeLabel, ARROW_X + 2, ARROW_Y - 9, 0xFF_FF_AA_00, false);
-
-        // Draw "Superheat" label at top
-        guiGraphics.drawString(font,
-                Component.translatable("jei.molten_vents.superheat").getString(),
-                DORMANT_X, 0,
-                0xFF_CC_CC_CC,
-                false
-        );
+        int timeW = font.width(timeLabel);
+        // centre over the arrow gap (gap runs from right edge of left slot x=24 to left edge of right slot x=84, centre=54)
+        guiGraphics.drawString(font, timeLabel,
+                54 - timeW / 2, TIME_Y,
+                0xFF_FF_AA_00,   // orange
+                false);
     }
 }
