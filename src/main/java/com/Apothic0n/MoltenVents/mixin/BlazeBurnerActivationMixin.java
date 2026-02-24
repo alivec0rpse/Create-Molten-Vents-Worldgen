@@ -37,9 +37,8 @@ public abstract class BlazeBurnerActivationMixin {
     @Shadow
     public abstract BlazeBurnerBlock.HeatLevel getHeatLevelFromBlock();
 
-    /** Returns true when the BE is being used inside a Ponder scene (virtual world). */
-    @Shadow
-    public abstract boolean isVirtual();
+    // isVirtual() is on SmartBlockEntity (parent) — not shadowed to avoid Ponder compile dep.
+    // Ponder virtual worlds are client-side, so the isClientSide() guard in the tick is sufficient.
 
     // ---- unique state ----------------------------------------------------------
 
@@ -54,15 +53,17 @@ public abstract class BlazeBurnerActivationMixin {
         return (BlockEntity) (Object) this;
     }
 
+
+
     // ---- NBT persistence -------------------------------------------------------
 
     @Inject(method = "write", at = @At("HEAD"))
-    private void moltenVents$write(CompoundTag tag, boolean clientPacket, CallbackInfo ci) {
+    private void moltenVents$write(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries, boolean clientPacket, CallbackInfo ci) {
         tag.putInt("moltenVentsConversionTimer", moltenVents$conversionTimer);
     }
 
     @Inject(method = "read", at = @At("HEAD"))
-    private void moltenVents$read(CompoundTag tag, boolean clientPacket, CallbackInfo ci) {
+    private void moltenVents$read(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries, boolean clientPacket, CallbackInfo ci) {
         if (tag.contains("moltenVentsConversionTimer")) {
             moltenVents$conversionTimer = tag.getInt("moltenVentsConversionTimer");
         } else {
@@ -76,8 +77,8 @@ public abstract class BlazeBurnerActivationMixin {
     private void moltenVents$tick(CallbackInfo ci) {
         BlockEntity be = moltenVents$self();
 
-        // Only run server-side
-        if (!be.hasLevel() || isVirtual() || be.getLevel().isClientSide()) return;
+        // Only run server-side (Ponder virtual worlds are also client-side, so this covers both)
+        if (!be.hasLevel() || be.getLevel().isClientSide()) return;
 
         BlockPos belowPos = be.getBlockPos().below();
         Block belowBlock = be.getLevel().getBlockState(belowPos).getBlock();
